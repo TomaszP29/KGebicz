@@ -1,0 +1,177 @@
+JAVA
+
+package com.example.formularz;
+
+import android.os.Bundle;
+import android.util.Patterns;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText editImie;
+    private EditText editNazwisko;
+    private EditText editEmail;
+    private EditText editHaslo;
+    private Button buttonZarejestruj;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editImie = findViewById(R.id.editImie);
+        editNazwisko = findViewById(R.id.editNazwisko);
+        editEmail = findViewById(R.id.editEmail);
+        editHaslo = findViewById(R.id.editHaslo);
+        buttonZarejestruj = findViewById(R.id.buttonZarejestruj);
+
+        buttonZarejestruj.setOnClickListener(v -> zarejestruj());
+    }
+
+    private void zarejestruj() {
+
+        String imie = editImie.getText().toString().trim();
+        String nazwisko = editNazwisko.getText().toString().trim();
+        String email = editEmail.getText().toString().trim();
+        String haslo = editHaslo.getText().toString();
+
+        if (imie.isEmpty()) {
+            editImie.setError("Podaj imię");
+            editImie.requestFocus();
+            return;
+        }
+
+        if (nazwisko.isEmpty()) {
+            editNazwisko.setError("Podaj nazwisko");
+            editNazwisko.requestFocus();
+            return;
+        }
+
+        if (email.isEmpty()) {
+            editEmail.setError("Podaj adres e-mail");
+            editEmail.requestFocus();
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            editEmail.setError("Podaj poprawny adres e-mail");
+            editEmail.requestFocus();
+            return;
+        }
+
+        if (haslo.isEmpty()) {
+            editHaslo.setError("Podaj hasło");
+            editHaslo.requestFocus();
+            return;
+        }
+
+        if (haslo.length() < 6) {
+            editHaslo.setError("Hasło musi mieć minimum 6 znaków");
+            editHaslo.requestFocus();
+            return;
+        }
+
+        Toast.makeText(
+                this,
+                "Rejestracja zakończona pomyślnie!",
+                Toast.LENGTH_LONG
+        ).show();
+    }
+}
+
+activity_main.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rejestracja"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <EditText
+            android:id="@+id/editImie"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Imię"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editNazwisko"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nazwisko"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-mail"
+            android:inputType="textEmailAddress"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editHaslo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Hasło"
+            android:inputType="textPassword"
+            android:layout_marginBottom="24dp" />
+
+        <Button
+            android:id="@+id/buttonZarejestruj"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ZAREJESTRUJ" />
+
+    </LinearLayout>
+
+</ScrollView>
+
+AndroidManifest
+
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:label="Formularz"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Formularz">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+    </application>
+
+</manifest>
