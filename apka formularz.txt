@@ -10,6 +10,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText editImie;
@@ -75,11 +79,32 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(
-                this,
-                "Rejestracja zakończona pomyślnie!",
-                Toast.LENGTH_LONG
-        ).show();
+        zapiszDoPliku();
+
+            Toast.makeText(
+                    this,
+                    "Rejestracja zakończona pomyślnie!",
+                    Toast.LENGTH_LONG
+            ).show();
+    }
+
+    private void zapiszDoPliku() {
+        String imie = editImie.getText().toString().trim();
+        String nazwisko = editNazwisko.getText().toString().trim();
+        String email = editEmail.getText().toString().trim();
+        String haslo = editHaslo.getText().toString().trim();
+
+        String dane = "Imie: " + imie + "\n" + "Nazwisko: " + nazwisko + "\n" + "E-mail: " + email + "\n" + "Hasło: " + haslo + "\n";
+
+        try (FileOutputStream fos = openFileOutput("dane.txt", MODE_APPEND)) {
+            fos.write(dane.getBytes(StandardCharsets.UTF_8));
+        }catch (IOException e) {
+            Toast.makeText(
+                    this,
+                    "Błąd podczas zapisywania danych!",
+                    Toast.LENGTH_LONG
+            ).show();
+        }
     }
 }
 
