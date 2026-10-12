@@ -1,6 +1,6 @@
 JAVA
 
-package com.example.formularz;
+package com.example.myapplication;
 
 import android.os.Bundle;
 import android.util.Patterns;
@@ -159,7 +159,7 @@ AndroidManifest
         android:allowBackup="true"
         android:label="Formularz"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Formularz">
+        android:theme="@style/Theme.MyApplication">
 
         <activity
             android:name=".MainActivity"
