@@ -98,7 +98,7 @@ xml:
 
 java:
 
-package com.example.myapplication2;
+package com.example.myapplication;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
@@ -109,7 +109,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
-public class MainActivity2 extends Activity {
+public class MainActivity extends Activity {
 
     EditText name, editor;
     ArrayList<String> files = new ArrayList<>();
@@ -119,7 +119,7 @@ public class MainActivity2 extends Activity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_main);
 
         name = findViewById(R.id.fileNameInput);
         editor = findViewById(R.id.editor);
@@ -135,7 +135,7 @@ public class MainActivity2 extends Activity {
             @Override
             public Holder onCreateViewHolder(
                     android.view.ViewGroup p, int t) {
-                TextView v = new TextView(MainActivity2.this);
+                TextView v = new TextView(MainActivity.this);
                 v.setPadding(16, 12, 16, 12);
                 return new Holder(v);
             }
@@ -245,7 +245,7 @@ public class MainActivity2 extends Activity {
             @Override
             public Holder onCreateViewHolder(
                     android.view.ViewGroup p, int t) {
-                TextView v = new TextView(MainActivity2.this);
+                TextView v = new TextView(MainActivity.this);
                 v.setPadding(16, 12, 16, 12);
                 return new Holder(v);
             }
