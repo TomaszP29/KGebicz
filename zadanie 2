@@ -1,0 +1,278 @@
+xml:
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="40dp">
+
+        <EditText
+            android:id="@+id/fileNameInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Nazwa pliku"
+            android:singleLine="true"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/openButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Otwórz" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
+        android:text="Otwarte pliki"
+        android:textSize="16sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/openFilesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/editor"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:gravity="top|start"
+        android:hint="Treść pliku"
+        android:inputType="textMultiLine"
+        android:scrollbars="vertical" />
+
+    <LinearLayout
+        android:id="@+id/buttonPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="8dp">
+
+        <Button
+            android:id="@+id/newButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Nowy" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Zapisz" />
+
+        <Button
+            android:id="@+id/closeButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Zamknij" />
+
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Usuń" />
+
+    </LinearLayout>
+</LinearLayout>
+
+
+java:
+
+package com.example.myapplication2;
+import android.app.Activity;
+import android.os.Build;
+import android.os.Bundle;
+import android.widget.*;
+import androidx.recyclerview.widget.*;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.*;
+
+public class MainActivity2 extends Activity {
+
+    EditText name, editor;
+    ArrayList<String> files = new ArrayList<>();
+    ArrayAdapter<String> adapter;
+    File dir, current;
+
+    @Override
+    protected void onCreate(Bundle b) {
+        super.onCreate(b);
+        setContentView(R.layout.activity_main2);
+
+        name = findViewById(R.id.fileNameInput);
+        editor = findViewById(R.id.editor);
+        dir = new File(getFilesDir(), "documents");
+        dir.mkdirs();
+
+        RecyclerView rv = findViewById(R.id.openFilesRecyclerView);
+        adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, files);
+
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setAdapter(new RecyclerView.Adapter<Holder>() {
+            @Override
+            public Holder onCreateViewHolder(
+                    android.view.ViewGroup p, int t) {
+                TextView v = new TextView(MainActivity2.this);
+                v.setPadding(16, 12, 16, 12);
+                return new Holder(v);
+            }
+
+            @Override
+            public void onBindViewHolder(Holder h, int i) {
+                String f = files.get(i);
+                h.v.setText(f);
+                h.v.setOnClickListener(v -> open(f));
+            }
+
+            @Override
+            public int getItemCount() {
+                return files.size();
+            }
+        });
+
+        findViewById(R.id.openButton).setOnClickListener(v ->
+                open(name.getText().toString()));
+
+        findViewById(R.id.newButton).setOnClickListener(v -> {
+            current = null;
+            name.setText("");
+            editor.setText("");
+        });
+
+        findViewById(R.id.saveButton).setOnClickListener(v -> save());
+
+        findViewById(R.id.closeButton).setOnClickListener(v -> {
+            current = null;
+            name.setText("");
+            editor.setText("");
+        });
+
+        findViewById(R.id.deleteButton).setOnClickListener(v -> {
+            File f = file(name.getText().toString());
+            if (f != null && f.delete()) {
+                current = null;
+                name.setText("");
+                editor.setText("");
+                refresh();
+                msg("Usunięto plik");
+            } else msg("Nie znaleziono pliku");
+        });
+
+        refresh();
+    }
+
+    File file(String n) {
+        n = n.trim();
+        if (n.isEmpty() || n.contains("/") ||
+                n.contains("\\") || n.contains(":")) return null;
+        if (!n.endsWith(".txt")) n += ".txt";
+        return new File(dir, n);
+    }
+
+    void open(String n) {
+        File f = file(n);
+        try {
+            if (f == null || !f.isFile()) {
+                msg("Plik nie istnieje");
+                return;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                editor.setText(new String(
+                        Files.readAllBytes(f.toPath()),
+                        StandardCharsets.UTF_8));
+            }
+            name.setText(f.getName());
+            current = f;
+            refresh();
+        } catch (Exception e) {
+            msg("Błąd otwierania");
+        }
+    }
+
+    void save() {
+        File f = file(name.getText().toString());
+        try {
+            if (f == null) {
+                msg("Podaj poprawną nazwę");
+                return;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Files.write(f.toPath(),
+                        editor.getText().toString().getBytes("UTF-8"));
+            }
+            current = f;
+            name.setText(f.getName());
+            refresh();
+            msg("Zapisano");
+        } catch (Exception e) {
+            msg("Błąd zapisu");
+        }
+    }
+
+    void refresh() {
+        files.clear();
+        File[] list = dir.listFiles();
+        if (list != null)
+            for (File f : list)
+                if (f.isFile() && f.getName().endsWith(".txt"))
+                    files.add(f.getName());
+
+        RecyclerView rv = findViewById(R.id.openFilesRecyclerView);
+        rv.setAdapter(new RecyclerView.Adapter<Holder>() {
+            @Override
+            public Holder onCreateViewHolder(
+                    android.view.ViewGroup p, int t) {
+                TextView v = new TextView(MainActivity2.this);
+                v.setPadding(16, 12, 16, 12);
+                return new Holder(v);
+            }
+
+            @Override
+            public void onBindViewHolder(Holder h, int i) {
+                String s = files.get(i);
+                h.v.setText(s);
+                h.v.setOnClickListener(v -> open(s));
+            }
+
+            @Override
+            public int getItemCount() {
+                return files.size();
+            }
+        });
+    }
+
+    static class Holder extends RecyclerView.ViewHolder {
+        TextView v;
+        Holder(TextView v) {
+            super(v);
+            this.v = v;
+        }
+    }
+
+    void msg(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+}
