@@ -1,0 +1,289 @@
+XML:
+
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rzuty kostkami"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#222222"
+            android:gravity="center"
+            android:layout_marginBottom="20dp"/>
+
+        <EditText
+            android:id="@+id/editTextLiczbaKostek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Podaj liczbę kostek"
+            android:inputType="number"
+            android:gravity="center"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/buttonLosuj"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Losuj"
+            android:layout_marginTop="12dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/buttonRosnaco"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Rosnąco"/>
+
+            <Button
+                android:id="@+id/buttonMalejaco"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Malejąco"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Wylosowane wyniki:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#222222"
+            android:layout_marginTop="24dp"/>
+
+        <TextView
+            android:id="@+id/textViewWyniki"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tutaj pojawią się wyniki"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kostki:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#222222"
+            android:layout_marginTop="24dp"/>
+
+        <GridLayout
+            android:id="@+id/gridKostki"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="5"
+            android:alignmentMode="alignMargins"
+            android:useDefaultMargins="true"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+
+</ScrollView>
+
+java:
+
+package com.example.myapplication;
+
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText editTextLiczbaKostek;
+    private Button buttonLosuj;
+    private Button buttonRosnaco;
+    private Button buttonMalejaco;
+    private GridLayout gridKostki;
+    private TextView textViewWyniki;
+    private ArrayList<Integer> listaWynikow = new ArrayList<>();
+    private Random random = new Random();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editTextLiczbaKostek = findViewById(R.id.editTextLiczbaKostek);
+        buttonLosuj =findViewById(R.id.buttonLosuj);
+        buttonRosnaco = findViewById(R.id.buttonRosnaco);
+        buttonMalejaco = findViewById(R.id.buttonMalejaco);
+        gridKostki = findViewById(R.id.gridKostki);
+        textViewWyniki = findViewById(R.id.textViewWyniki);
+        buttonLosuj.setOnClickListener(v -> losujKostki());
+        buttonRosnaco.setOnClickListener(v -> {
+            if (sprawdzWyniki()) {
+                sortujRosnaco();
+            }
+        });
+
+        buttonMalejaco.setOnClickListener(v -> {
+            if (sprawdzWyniki()) {
+                sortujMalejaco();
+            }
+        });
+    }
+
+    private void losujKostki() {
+        String tekst = editTextLiczbaKostek.getText().toString().trim();
+
+        if (tekst.isEmpty()) {
+            Toast.makeText(this,
+                    "Wpisz liczbę kostek!",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int liczba;
+
+        try {
+            liczba = Integer.parseInt(tekst);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this,
+                    "Podaj prawidłową liczbę!",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (liczba < 1 || liczba > 100) {
+            Toast.makeText(this,
+                    "Liczba kostek musi być od 1 do 100!",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        listaWynikow.clear();
+        gridKostki.removeAllViews();
+        textViewWyniki.setText("");
+
+        for (int i = 0; i < liczba; i++) {
+            int wynik = random.nextInt(6) + 1;
+
+            listaWynikow.add(wynik);
+        }
+        odswiezWidok();
+    }
+
+    private boolean sprawdzWyniki() {
+        if (listaWynikow.isEmpty()) {
+            Toast.makeText(this,
+                    "Najpierw wylosuj kostki!",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void sortujRosnaco() {
+        int n = listaWynikow.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (listaWynikow.get(j) >
+                        listaWynikow.get(j + 1)) {
+                    int temp = listaWynikow.get(j);
+                    listaWynikow.set(j,
+                            listaWynikow.get(j + 1));
+                    listaWynikow.set(j + 1, temp);
+                }
+            }
+        }
+        odswiezWidok();
+    }
+
+    private void sortujMalejaco() {
+        int n = listaWynikow.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (listaWynikow.get(j) <
+                        listaWynikow.get(j + 1)) {
+                    int temp = listaWynikow.get(j);
+                    listaWynikow.set(j,
+                            listaWynikow.get(j + 1));
+                    listaWynikow.set(j + 1, temp);
+                }
+            }
+        }
+        odswiezWidok();
+    }
+
+    private void odswiezWidok() {
+        StringBuilder tekst = new StringBuilder();
+        for (int i = 0; i < listaWynikow.size(); i++) {
+            tekst.append(listaWynikow.get(i));
+            if (i < listaWynikow.size() - 1) {
+                tekst.append(", ");
+            }
+        }
+
+        textViewWyniki.setText(tekst.toString());
+        gridKostki.removeAllViews();
+        String[] kostki = {
+                "",
+                "\u2680",
+                "\u2681",
+                "\u2682",
+                "\u2683",
+                "\u2684",
+                "\u2685"
+        };
+
+        for (int wynik : listaWynikow) {
+            TextView kostka = new TextView(this);
+
+            kostka.setText(kostki[wynik]);
+            kostka.setTextSize(42);
+            kostka.setTextColor(Color.BLACK);
+            kostka.setGravity(Gravity.CENTER);
+
+            GradientDrawable tlo = new GradientDrawable();
+
+            tlo.setColor(Color.WHITE);
+            tlo.setCornerRadius(12);
+            tlo.setStroke(2, Color.GRAY);
+
+            kostka.setBackground(tlo);
+
+            GridLayout.LayoutParams params =
+                    new GridLayout.LayoutParams();
+
+            params.width = 55;
+            params.height = 65;
+            params.setMargins(5, 5, 5, 5);
+
+            kostka.setLayoutParams(params);
+
+            gridKostki.addView(kostka);
+        }
+    }
+}
